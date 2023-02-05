@@ -7,6 +7,7 @@ package io.flutter.plugins.inapppurchase;
 import androidx.annotation.Nullable;
 import com.android.billingclient.api.AccountIdentifiers;
 import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchaseHistoryRecord;
 import com.android.billingclient.api.SkuDetails;
@@ -19,35 +20,36 @@ import java.util.Locale;
 
 /** Handles serialization of {@link com.android.billingclient.api.BillingClient} related objects. */
 /*package*/ class Translator {
-  static HashMap<String, Object> fromSkuDetail(SkuDetails detail) {
+  static HashMap<String, Object> fromSkuDetail(ProductDetails detail) {
+    // TODO: Look here later
     HashMap<String, Object> info = new HashMap<>();
     info.put("title", detail.getTitle());
     info.put("description", detail.getDescription());
-    info.put("freeTrialPeriod", detail.getFreeTrialPeriod());
-    info.put("introductoryPrice", detail.getIntroductoryPrice());
-    info.put("introductoryPriceAmountMicros", detail.getIntroductoryPriceAmountMicros());
-    info.put("introductoryPriceCycles", detail.getIntroductoryPriceCycles());
-    info.put("introductoryPricePeriod", detail.getIntroductoryPricePeriod());
-    info.put("price", detail.getPrice());
-    info.put("priceAmountMicros", detail.getPriceAmountMicros());
-    info.put("priceCurrencyCode", detail.getPriceCurrencyCode());
-    info.put("priceCurrencySymbol", currencySymbolFromCode(detail.getPriceCurrencyCode()));
-    info.put("sku", detail.getSku());
-    info.put("type", detail.getType());
-    info.put("subscriptionPeriod", detail.getSubscriptionPeriod());
-    info.put("originalPrice", detail.getOriginalPrice());
-    info.put("originalPriceAmountMicros", detail.getOriginalPriceAmountMicros());
+    info.put("freeTrialPeriod", null);
+    info.put("introductoryPrice", detail.getSubscriptionOfferDetails().get(0).getPricingPhases().getPricingPhaseList().get(0).getFormattedPrice());
+    info.put("introductoryPriceAmountMicros", detail.getSubscriptionOfferDetails().get(0).getPricingPhases().getPricingPhaseList().get(0).getPriceAmountMicros());
+    info.put("introductoryPriceCycles", null);
+    info.put("introductoryPricePeriod", null);
+    info.put("price", detail.getSubscriptionOfferDetails().get(0).getPricingPhases().getPricingPhaseList().get(0).getFormattedPrice());
+    info.put("priceAmountMicros", detail.getSubscriptionOfferDetails().get(0).getPricingPhases().getPricingPhaseList().get(0).getPriceAmountMicros());
+    info.put("priceCurrencyCode", detail.getSubscriptionOfferDetails().get(0).getPricingPhases().getPricingPhaseList().get(0).getPriceCurrencyCode());
+    info.put("priceCurrencySymbol", detail.getSubscriptionOfferDetails().get(0).getPricingPhases().getPricingPhaseList().get(0).getPriceCurrencyCode());
+    info.put("sku", detail.getProductId());
+    info.put("type", detail.getProductType());
+    info.put("subscriptionPeriod", detail.getSubscriptionOfferDetails().get(0).getPricingPhases().getPricingPhaseList().get(0).getBillingPeriod());
+    info.put("originalPrice", detail.getSubscriptionOfferDetails().get(0).getPricingPhases().getPricingPhaseList().get(0).getFormattedPrice());
+    info.put("originalPriceAmountMicros", detail.getSubscriptionOfferDetails().get(0).getPricingPhases().getPricingPhaseList().get(0).getPriceAmountMicros());
     return info;
   }
 
   static List<HashMap<String, Object>> fromSkuDetailsList(
-      @Nullable List<SkuDetails> skuDetailsList) {
+      @Nullable List<ProductDetails> skuDetailsList) {
     if (skuDetailsList == null) {
       return Collections.emptyList();
     }
 
     ArrayList<HashMap<String, Object>> output = new ArrayList<>();
-    for (SkuDetails detail : skuDetailsList) {
+    for (ProductDetails detail : skuDetailsList) {
       output.add(fromSkuDetail(detail));
     }
     return output;
